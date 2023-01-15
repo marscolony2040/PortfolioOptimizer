@@ -22,6 +22,8 @@ export default class App extends React.Component {
     this.buildTicks = this.buildTicks.bind(this)
     this.changeVal = this.changeVal.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
+    this.Tab1 = this.Tab1.bind(this)
+    this.Tab2 = this.Tab2.bind(this)
   }
 
   componentDidMount(){
@@ -73,13 +75,75 @@ export default class App extends React.Component {
     return hold
   }
 
+  Tab1(style, bg, fg){
+    const { response, N } = this.state
+    var hold = []
+    var tab = []
+    const names = ['tickers', 'price', 'beta', 'capm', 'risk_weights', 'ret_weights']
+    tab.push(
+      
+    )
+
+    hold.push(
+        <tr style={style}>
+            <td>Ticker</td>&nbsp;
+            <td>Price</td>&nbsp;
+            <td>Beta</td>&nbsp;
+            <td>Return</td>&nbsp;
+            <td>MinRiskWeight</td>&nbsp;
+            <td>MaxRetWeight</td>
+        </tr>
+    )
+
+    if(response != null){
+      for(var i = 0; i < N; i++){
+        var row = []
+        names.forEach((ix) => {
+          row.push(
+            <td style={style}>
+              {response[ix][i]}
+            </td>
+          )
+          row.push(
+            <td>&nbsp;</td>
+          )
+        })
+        hold.push(
+          <tr>{row}</tr>
+        )
+      }
+    }
+
+    return hold
+  }
+
+  Tab2(style, bg, fg){
+    const { response } = this.state 
+    var hold = []
+    var temp = []
+    if(response != null){
+      temp.push(<td style={style}>Min-Risk Beta</td>)
+      temp.push(<td style={style}>{response['min_risk_beta']}</td>)
+      temp.push(<td style={style}>Min-Risk Return</td>)
+      temp.push(<td style={style}>{response['min_risk_rtns']}</td>)
+    }
+
+    hold.push(
+      <tr>{temp}</tr>
+    )
+
+    return hold
+  }
+
   render() {
     const bg = 'black'
     const fg = 'cyan'
     const title_style = {backgroundColor: bg, color: fg, fontSize: 40}
     const inp_style = {backgroundColor: bg, color: fg, width: 100, fontSize: 18, textAlign: "center"}
     const inp_style2 = {backgroundColor: bg, color: fg, width: 100, fontSize: 20, textAlign: "center"}
+    const inp_style3 = {backgroundColor: bg, color: fg, width: 150, fontSize: 20, textAlign: "center"}
     
+
 
     return (
       <React.Fragment>
@@ -112,6 +176,11 @@ export default class App extends React.Component {
               </center>
           `</table>
           <div>{this.buildTicks(bg, fg)}</div>
+          <br/>
+          <br/>
+          <table>{this.Tab1(inp_style2, bg, fg)}</table>
+          <br/>
+          <table>{this.Tab2(inp_style3, bg, fg)}</table>
           </center>
       </React.Fragment>
     );

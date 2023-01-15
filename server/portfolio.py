@@ -71,12 +71,16 @@ def CAPM(rf, mkt, beta):
 async def Port(tickers, items, session):
     capmx = []
     beta = []
+    price = []
+    mktcap = []
     for t in tickers:
         dp, db, mt = await fetch_data(t, session)
-        print(dp, db, mt)
+        #print(dp, db, mt)
         bt = CAPM(items['rf'], items['mkt'], db)
         beta.append(db)
         capmx.append(bt)
+        price.append(dp)
+        mktcap.append(mt)
     risk_opt = min_risk(beta, capmx, items['ret_tol'])
     tol_opt = max_return(beta, capmx, items['risk_tol'])
-    return beta, capmx, risk_opt, tol_opt
+    return beta, capmx, price, mktcap, risk_opt, tol_opt
