@@ -55,7 +55,16 @@ def dataset(r):
         mktcap = float(data[12].replace('T',''))*1000000000000
     else:
         mktcap = float(data[12])
-    return price, beta, mktcap
+    
+    if 'B' in data[9]:
+        volume = float(data[9].replace('B',''))*1000000000
+    elif 'T' in data[9]:
+        volume = float(data[9].replace('T',''))*1000000000000
+    elif 'M' in data[9]:
+        volume = float(data[9].replace('M',''))*1000000
+    else:
+        volume = float(data[9])
+    return price, beta, mktcap, volume
 
 async def fetch_data(ticker, session):
     url = 'https://site.financialmodelingprep.com/financial-summary/{}'.format(ticker)
@@ -73,14 +82,16 @@ async def Port(tickers, items, session):
     beta = []
     price = []
     mktcap = []
+    volume = []
     for t in tickers:
-        dp, db, mt = await fetch_data(t, session)
+        dp, db, mt, vol = await fetch_data(t, session)
         #print(dp, db, mt)
         bt = CAPM(items['rf'], items['mkt'], db)
         beta.append(db)
         capmx.append(bt)
         price.append(dp)
         mktcap.append(mt)
+        volume.append(vol)
     risk_opt = min_risk(beta, capmx, items['ret_tol'])
     tol_opt = max_return(beta, capmx, items['risk_tol'])
-    return beta, capmx, price, mktcap, risk_opt, tol_opt
+    return beta, capmx, price, mktcap, volume, risk_opt, tol_opt

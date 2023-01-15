@@ -24,6 +24,7 @@ export default class App extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this)
     this.Tab1 = this.Tab1.bind(this)
     this.Tab2 = this.Tab2.bind(this)
+    this.Tab3 = this.Tab3.bind(this)
   }
 
   componentDidMount(){
@@ -79,24 +80,25 @@ export default class App extends React.Component {
     const { response, N } = this.state
     var hold = []
     var tab = []
-    const names = ['tickers', 'price', 'beta', 'capm', 'risk_weights', 'ret_weights']
-    tab.push(
-      
-    )
+    const names = ['tickers', 'price', 'beta', 'capm', 'risk_weights', 'ret_weights', 'risk_shares', 'ret_shares']
+
+    const style2 = {backgroundColor: fg, color: bg, width: 100, fontSize: 20, textAlign: "center"}
 
     hold.push(
-        <tr style={style}>
-            <td>Ticker</td>&nbsp;
-            <td>Price</td>&nbsp;
-            <td>Beta</td>&nbsp;
-            <td>Return</td>&nbsp;
-            <td>MinRiskWeight</td>&nbsp;
-            <td>MaxRetWeight</td>
+        <tr>
+            <td style={style2}>Ticker</td>&nbsp;
+            <td style={style2}>Price</td>&nbsp;
+            <td style={style2}>Beta</td>&nbsp;
+            <td style={style2}>Return</td>&nbsp;
+            <td style={style2}>MinRiskWeight</td>&nbsp;
+            <td style={style2}>MaxRetWeight</td>&nbsp;
+            <td style={style2}>MinRiskShares</td>&nbsp;
+            <td style={style2}>MaxRetShares</td>
         </tr>
     )
 
     if(response != null){
-      for(var i = 0; i < N; i++){
+      for(var i = 0; i < response['tickers'].length; i++){
         var row = []
         names.forEach((ix) => {
           row.push(
@@ -105,7 +107,7 @@ export default class App extends React.Component {
             </td>
           )
           row.push(
-            <td>&nbsp;</td>
+            <td style={{backgroundColor: bg}}>&nbsp;</td>
           )
         })
         hold.push(
@@ -121,17 +123,88 @@ export default class App extends React.Component {
     const { response } = this.state 
     var hold = []
     var temp = []
+    var kemp = []
     if(response != null){
       temp.push(<td style={style}>Min-Risk Beta</td>)
       temp.push(<td style={style}>{response['min_risk_beta']}</td>)
       temp.push(<td style={style}>Min-Risk Return</td>)
       temp.push(<td style={style}>{response['min_risk_rtns']}</td>)
+      kemp.push(<td style={style}>Max-Ret Beta</td>)
+      kemp.push(<td style={style}>{response['max_ret_beta']}</td>)
+      kemp.push(<td style={style}>Max-Ret Return</td>)
+      kemp.push(<td style={style}>{response['max_ret_rtns']}</td>)
     }
 
     hold.push(
       <tr>{temp}</tr>
     )
 
+    hold.push(
+      <tr>{kemp}</tr>
+    )
+
+    return hold
+  }
+
+  Tab3(bg, fg){
+    const { response } = this.state
+    const hold = []
+    if(response != null){
+      hold.push(
+        <Plot 
+          data={[{
+            values: response['risk_weights'],
+            labels: response['tickers'],
+            type: 'pie',
+            textinfo: 'label+percent',
+            textposition: 'inside',
+            automargin: true,
+            marker: {
+              color: fg
+            }
+          }]}
+          layout={{
+            title: {
+              text: 'Minimized Risk Allocation',
+              font: {
+                color: fg,
+                size: 20
+              }
+            },
+            paper_bgcolor: bg,
+            plot_bgcolor: bg,
+            showlegend: false
+          }}
+        />
+      )
+      hold.push(
+        <Plot 
+          data={[{
+            values: response['ret_weights'],
+            labels: response['tickers'],
+            type: 'pie',
+            textinfo: 'label+percent',
+            textposition: 'inside',
+            automargin: true,
+            marker: {
+              color: fg
+            }
+          }]}
+          layout={{
+            title: {
+              text: 'Maximized Return Allocation',
+              font: {
+                color: fg,
+                size: 20
+              }
+            },
+            paper_bgcolor: bg,
+            plot_bgcolor: bg,
+            showlegend: false
+          }}
+        />
+      )
+    }
     return hold
   }
 
@@ -180,7 +253,11 @@ export default class App extends React.Component {
           <br/>
           <table>{this.Tab1(inp_style2, bg, fg)}</table>
           <br/>
+          <center><tr style={{backgroundColor: bg, color: fg, fontSize: 22}}><b>Risk/Return Metrics</b></tr></center>   
+          <br/>
           <table>{this.Tab2(inp_style3, bg, fg)}</table>
+          <br/>
+          <table>{this.Tab3(bg, fg)}</table>
           </center>
       </React.Fragment>
     );

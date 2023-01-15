@@ -26,6 +26,7 @@ def portfolio(w, b):
 def calcshares(w, price, balance):
     return [round(weight*balance/cost, 0) for weight, cost in zip(w, price)]
 
+r = lambda x: [round(i, 3) for i in x]
 
 class Server:
 
@@ -52,29 +53,27 @@ class Server:
                     items[i] = resp[i]
 
                 tickers = cleanup(resp)
-                beta, capmx, price, mktcap, risk_opt, tol_opt = await Port(tickers, items, sess)
+                beta, capmx, price, mktcap, volume, risk_opt, tol_opt = await Port(tickers, items, sess)
                 
                 min_risk_beta = portfolio(risk_opt, beta)
                 min_risk_rtns = portfolio(risk_opt, capmx)
-                min_risk_shares = calcshares(risk_opt, price, balance)
-                
+
                 max_ret_beta = portfolio(tol_opt, beta)
                 max_ret_rtns = portfolio(tol_opt, capmx)
-                max_risk_shares = calcshares(tol_opt, price, balance)
 
                 msg = {'tickers': tickers,
-                       'beta': beta,
-                       'capm': capmx,
+                       'beta': r(beta),
+                       'capm': r(capmx),
                        'price': price,
                        'mktcap': mktcap,
-                       'risk_weights': risk_opt,
-                       'ret_weights': tol_opt,
-                       'min_risk_beta': min_risk_beta,
-                       'min_risk_rtns': min_risk_rtns,
-                       'min_risk_shares': min_risk_shares,
-                       'max_ret_beta': max_ret_beta,
-                       'max_ret_rtns': max_ret_rtns,
-                       'max_risk_shares': max_risk_shares}
+                       'risk_weights': r(risk_opt),
+                       'ret_weights': r(tol_opt),
+                       'risk_shares': calcshares(risk_opt, price, balance),
+                       'ret_shares': calcshares(tol_opt, price, balance),
+                       'min_risk_beta': round(min_risk_beta, 3),
+                       'min_risk_rtns': round(min_risk_rtns, 3),
+                       'max_ret_beta': round(max_ret_beta, 3),
+                       'max_ret_rtns': round(max_ret_rtns, 3)}
 
                 await ws.send(json.dumps(msg))
 
