@@ -26,6 +26,10 @@ def portfolio(w, b):
 def calcshares(w, price, balance):
     return [round(weight*balance/cost, 0) for weight, cost in zip(w, price)]
 
+def calcvmkt(mkt, price, vol):
+    return [round(k/(i/j), 4) for i, j, k in zip(mkt, price, vol)]
+
+
 r = lambda x: [round(i, 3) for i in x]
 
 class Server:
@@ -68,6 +72,7 @@ class Server:
                        'mktcap': mktcap,
                        'risk_weights': r(risk_opt),
                        'ret_weights': r(tol_opt),
+                       'vmkt': r(calcvmkt(mktcap, price, volume)),
                        'risk_shares': calcshares(risk_opt, price, balance),
                        'ret_shares': calcshares(tol_opt, price, balance),
                        'min_risk_beta': round(min_risk_beta, 3),

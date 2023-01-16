@@ -112,7 +112,7 @@ export default class App extends React.Component {
     var gold = []
     var hold = []
     var tab = []
-    const names = ['tickers', 'price', 'beta', 'capm', 'risk_weights', 'ret_weights', 'risk_shares', 'ret_shares']
+    const names = ['tickers', 'price', 'beta', 'capm', 'risk_weights', 'ret_weights', 'risk_shares', 'ret_shares', 'vmkt']
 
     const style2 = {backgroundColor: fg, color: bg, width: 170, fontSize: 20, textAlign: "center"}
 
@@ -126,6 +126,7 @@ export default class App extends React.Component {
             <td style={style2}><b>MaxRetWeight</b></td>&nbsp;
             <td style={style2}><b>MinRiskShares</b></td>&nbsp;
             <td style={style2}><b>MaxRetShares</b></td>&nbsp;
+            <td style={style2}><b>Shares Traded</b></td>&nbsp;
             <td style={style2}><b>Weights(%)</b></td>
         </tr>
     )
@@ -147,6 +148,7 @@ export default class App extends React.Component {
         row.push(
           <center><input name={I} step="0.01" min="0" onChange={this.changeWeight} style={style}/></center>
         )
+        
         hold.push(
           <tr>{row}</tr>
         )
