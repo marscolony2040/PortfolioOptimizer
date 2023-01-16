@@ -3,6 +3,10 @@ import Plot from 'react-plotly.js';
 
 import go from './images/go.png'
 
+const rd = (x) => {
+  return Math.round(x*1000)/1000;
+}
+
 export default class App extends React.Component {
 
   constructor(){
@@ -16,7 +20,12 @@ export default class App extends React.Component {
                    risk_tol: 1.2,
                    ret_tol: 0.13,
                    balance: 100000,
-                   tickers: {}}
+                   tickers: {},
+                   weights: {},
+                   shares: [],
+                   shares_sum: 0,
+                   w_beta: 0,
+                   w_retn: 0}
 
     this.handleChange = this.handleChange.bind(this)
     this.buildTicks = this.buildTicks.bind(this)
@@ -25,6 +34,7 @@ export default class App extends React.Component {
     this.Tab1 = this.Tab1.bind(this)
     this.Tab2 = this.Tab2.bind(this)
     this.Tab3 = this.Tab3.bind(this)
+    this.changeWeight = this.changeWeight.bind(this)
   }
 
   componentDidMount(){
@@ -50,6 +60,7 @@ export default class App extends React.Component {
                  'balance': balance}
     
     sock.send(JSON.stringify(msg))
+    this.setState({ weights: {} })
     evt.preventDefault();
   }
 
@@ -57,6 +68,26 @@ export default class App extends React.Component {
     const { tickers } = this.state;
     tickers[evt.target.name] = evt.target.value
     this.setState({ tickers: tickers })
+  }
+
+  changeWeight(evt){
+    const { weights, response, balance } = this.state
+    weights[evt.target.name] = parseFloat(evt.target.value)
+    const share = []
+    var total_shares = 0
+    var total_beta = 0
+    var total_rtn = 0
+    Object.keys(weights).map((key, ii) => {
+      const price = response['price'][ii]
+      const beta = response['beta'][ii]
+      const capx = response['capm'][ii]
+      const weight = weights[key]/100
+      total_shares += weight
+      total_beta += weight*beta 
+      total_rtn += weight*capx
+      share.push(Math.round(weight*balance/price))
+    })
+    this.setState({ w_beta: total_beta, w_retn: total_rtn, weights: weights, shares: share, shares_sum: total_shares })
   }
 
   handleChange(evt){
@@ -78,27 +109,30 @@ export default class App extends React.Component {
 
   Tab1(style, bg, fg){
     const { response, N } = this.state
+    var gold = []
     var hold = []
     var tab = []
     const names = ['tickers', 'price', 'beta', 'capm', 'risk_weights', 'ret_weights', 'risk_shares', 'ret_shares']
 
-    const style2 = {backgroundColor: fg, color: bg, width: 100, fontSize: 20, textAlign: "center"}
+    const style2 = {backgroundColor: fg, color: bg, width: 170, fontSize: 20, textAlign: "center"}
 
     hold.push(
         <tr>
-            <td style={style2}>Ticker</td>&nbsp;
-            <td style={style2}>Price</td>&nbsp;
-            <td style={style2}>Beta</td>&nbsp;
-            <td style={style2}>Return</td>&nbsp;
-            <td style={style2}>MinRiskWeight</td>&nbsp;
-            <td style={style2}>MaxRetWeight</td>&nbsp;
-            <td style={style2}>MinRiskShares</td>&nbsp;
-            <td style={style2}>MaxRetShares</td>
+            <td style={style2}><b>Ticker</b></td>&nbsp;
+            <td style={style2}><b>Price</b></td>&nbsp;
+            <td style={style2}><b>Beta</b></td>&nbsp;
+            <td style={style2}><b>Return</b></td>&nbsp;
+            <td style={style2}><b>MinRiskWeight</b></td>&nbsp;
+            <td style={style2}><b>MaxRetWeight</b></td>&nbsp;
+            <td style={style2}><b>MinRiskShares</b></td>&nbsp;
+            <td style={style2}><b>MaxRetShares</b></td>&nbsp;
+            <td style={style2}><b>Weights(%)</b></td>
         </tr>
     )
 
     if(response != null){
       for(var i = 0; i < response['tickers'].length; i++){
+        const I = "I" + i.toString()
         var row = []
         names.forEach((ix) => {
           row.push(
@@ -110,13 +144,66 @@ export default class App extends React.Component {
             <td style={{backgroundColor: bg}}>&nbsp;</td>
           )
         })
+        row.push(
+          <center><input name={I} step="0.01" min="0" onChange={this.changeWeight} style={style}/></center>
+        )
         hold.push(
           <tr>{row}</tr>
         )
       }
+      gold.push(
+        <table>
+          {hold}
+        </table>
+      )
+      const tan = []
+      const sin = []
+      for(var i = 0; i < this.state.shares.length; i++){
+        sin.push(
+          <td style={style}><b>{response['tickers'][i]}</b></td>
+        )
+        tan.push(
+          <td style={style}>{this.state.shares[i]}</td>
+        )
+      }
+      gold.push(
+        <br/>
+      )
+      gold.push(
+        <br/>
+      )
+      
+      gold.push(
+        <center><tr style={{backgroundColor: bg, color: fg, fontSize: 22}}><b>Portfolio Beta</b></tr></center>  
+      )
+      gold.push(
+        <center><tr style={{backgroundColor: bg, color: fg, fontSize: 22}}>{rd(this.state.w_beta)}</tr></center>
+      )
+      gold.push(
+        <center><tr style={{backgroundColor: bg, color: fg, fontSize: 22}}><b>Portfolio Return</b></tr></center>  
+      )
+      gold.push(
+        <center><tr style={{backgroundColor: bg, color: fg, fontSize: 22}}>{rd(this.state.w_retn)}</tr></center>
+      )
+      gold.push(
+        <center><tr style={{backgroundColor: bg, color: fg, fontSize: 22}}><b>Custom Shares</b></tr></center>  
+      )
+      gold.push(
+        <center><tr style={{backgroundColor: bg, color: fg, fontSize: 22}}>{rd(this.state.shares_sum)}</tr></center>
+      )
+      gold.push(
+        <br/>
+      )
+      gold.push(
+        <center>{sin}</center>
+      )
+      gold.push(
+        <center>{tan}</center>
+      )
     }
+    
 
-    return hold
+    return gold
   }
 
   Tab2(style, bg, fg){
@@ -173,7 +260,9 @@ export default class App extends React.Component {
             },
             paper_bgcolor: bg,
             plot_bgcolor: bg,
-            showlegend: false
+            showlegend: false,
+            width: 666,
+            height: 666
           }}
         />
       )
@@ -200,7 +289,9 @@ export default class App extends React.Component {
             },
             paper_bgcolor: bg,
             plot_bgcolor: bg,
-            showlegend: false
+            showlegend: false,
+            width: 666,
+            height: 666
           }}
         />
       )
@@ -242,8 +333,8 @@ export default class App extends React.Component {
                 <td><input name="N" type="number" step="1" min="0" value={this.state.N} onChange={this.handleChange} style={inp_style} /></td>&nbsp;
                 <td><input name="RF" type="number" step="0.0001" min="0" value={this.state.RF} onChange={this.handleChange} style={inp_style} /></td>&nbsp;
                 <td><input name="MKT" type="number" step="0.0001" min="0" value={this.state.MKT} onChange={this.handleChange} style={inp_style} /></td>&nbsp;
-                <td><input name="risk_tol" type="number" step="0.1" min="0" value={this.state.risk_tol} onChange={this.handleChange} style={inp_style}/></td>&nbsp;
-                <td><input name="ret_tol" type="number" step="0.1" min="0" value={this.state.ret_tol} onChange={this.handleChange} style={inp_style}/></td>&nbsp;
+                <td><input name="risk_tol" type="number" step="0.01" min="0" value={this.state.risk_tol} onChange={this.handleChange} style={inp_style}/></td>&nbsp;
+                <td><input name="ret_tol" type="number" step="0.01" min="0" value={this.state.ret_tol} onChange={this.handleChange} style={inp_style}/></td>&nbsp;
                 <td><input name="balance" type="number" step="1" min="0" value={this.state.balance} onChange={this.handleChange} style={inp_style}/></td>
               </tr>
               </center>
@@ -257,7 +348,9 @@ export default class App extends React.Component {
           <br/>
           <table>{this.Tab2(inp_style3, bg, fg)}</table>
           <br/>
-          <table>{this.Tab3(bg, fg)}</table>
+          <center>
+            <div>{this.Tab3(bg, fg)}</div>
+          </center>
           </center>
       </React.Fragment>
     );
