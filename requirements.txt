@@ -1,0 +1,6 @@
+aiohttp
+websockets
+numpy
+pandas
+bs4
+scipy
