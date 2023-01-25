@@ -53,6 +53,8 @@ def dataset(r):
         mktcap = float(data[12].replace('B',''))*1000000000
     elif 'T' in data[12]:
         mktcap = float(data[12].replace('T',''))*1000000000000
+    elif 'M' in data[12]:
+        mktcap = float(data[12].replace('M',''))*1000000
     else:
         mktcap = float(data[12])
     
