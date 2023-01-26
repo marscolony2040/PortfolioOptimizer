@@ -19,7 +19,7 @@ export default class App extends React.Component {
                    MKT: 0.12,
                    risk_tol: 1.2,
                    ret_tol: 0.13,
-                   balance: 100000,
+                   balance: 26000,
                    tickers: {},
                    weights: {},
                    shares: [],
@@ -34,7 +34,6 @@ export default class App extends React.Component {
     this.Tab1 = this.Tab1.bind(this)
     this.Tab2 = this.Tab2.bind(this)
     this.Tab3 = this.Tab3.bind(this)
-    this.changeWeight = this.changeWeight.bind(this)
   }
 
   componentDidMount(){
@@ -70,25 +69,6 @@ export default class App extends React.Component {
     this.setState({ tickers: tickers })
   }
 
-  changeWeight(evt){
-    const { weights, response, balance } = this.state
-    weights[evt.target.name] = parseFloat(evt.target.value)
-    const share = []
-    var total_shares = 0
-    var total_beta = 0
-    var total_rtn = 0
-    Object.keys(weights).map((key, ii) => {
-      const price = response['price'][ii]
-      const beta = response['beta'][ii]
-      const capx = response['capm'][ii]
-      const weight = weights[key]/100
-      total_shares += weight
-      total_beta += weight*beta 
-      total_rtn += weight*capx
-      share.push(Math.round(weight*balance/price))
-    })
-    this.setState({ w_beta: total_beta, w_retn: total_rtn, weights: weights, shares: share, shares_sum: total_shares })
-  }
 
   handleChange(evt){
     this.setState({ [evt.target.name]: parseFloat(evt.target.value) })
@@ -126,8 +106,7 @@ export default class App extends React.Component {
             <td style={style2}><b>MaxRetWeight</b></td>&nbsp;
             <td style={style2}><b>MinRiskShares</b></td>&nbsp;
             <td style={style2}><b>MaxRetShares</b></td>&nbsp;
-            <td style={style2}><b>Shares Traded</b></td>&nbsp;
-            <td style={style2}><b>Weights(%)</b></td>
+            <td style={style2}><b>Shares Traded</b></td>
         </tr>
     )
 
@@ -145,9 +124,7 @@ export default class App extends React.Component {
             <td style={{backgroundColor: bg}}>&nbsp;</td>
           )
         })
-        row.push(
-          <center><input name={I} step="0.01" min="0" onChange={this.changeWeight} style={style}/></center>
-        )
+        
         
         hold.push(
           <tr>{row}</tr>
@@ -175,27 +152,7 @@ export default class App extends React.Component {
         <br/>
       )
       
-      gold.push(
-        <center><tr style={{backgroundColor: bg, color: fg, fontSize: 22}}><b>Portfolio Beta</b></tr></center>  
-      )
-      gold.push(
-        <center><tr style={{backgroundColor: bg, color: fg, fontSize: 22}}>{rd(this.state.w_beta)}</tr></center>
-      )
-      gold.push(
-        <center><tr style={{backgroundColor: bg, color: fg, fontSize: 22}}><b>Portfolio Return</b></tr></center>  
-      )
-      gold.push(
-        <center><tr style={{backgroundColor: bg, color: fg, fontSize: 22}}>{rd(this.state.w_retn)}</tr></center>
-      )
-      gold.push(
-        <center><tr style={{backgroundColor: bg, color: fg, fontSize: 22}}><b>Custom Shares</b></tr></center>  
-      )
-      gold.push(
-        <center><tr style={{backgroundColor: bg, color: fg, fontSize: 22}}>{rd(this.state.shares_sum)}</tr></center>
-      )
-      gold.push(
-        <br/>
-      )
+      
       gold.push(
         <center>{sin}</center>
       )
@@ -316,7 +273,7 @@ export default class App extends React.Component {
         <center>
           <table>
             <center>
-            <tr style={title_style}><b>FinRisk</b></tr>
+            <tr style={title_style}><b>Portfolio Optimizer</b></tr>
             <tr><img src={go} alt="gobutton" onClick={this.handleSubmit}></img></tr>
             </center>
           </table>
