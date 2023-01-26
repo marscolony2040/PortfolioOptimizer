@@ -115,11 +115,25 @@ export default class App extends React.Component {
         const I = "I" + i.toString()
         var row = []
         names.forEach((ix) => {
-          row.push(
-            <td style={style}>
-              {response[ix][i]}
-            </td>
-          )
+          if(ix == 'price'){
+            row.push(
+              <td style={style}>
+                {"$" + response[ix][i].toFixed(2)}
+              </td>
+            )
+          } else if(ix == 'capm' || ix == 'risk_weights' || ix == 'ret_weights' || ix == 'vmkt'){
+            row.push(
+              <td style={style}>
+                {parseFloat(response[ix][i]*100).toFixed(3) + "%"}
+              </td>
+            )
+          } else {
+            row.push(
+              <td style={style}>
+                {response[ix][i]}
+              </td>
+            )
+          }
           row.push(
             <td style={{backgroundColor: bg}}>&nbsp;</td>
           )
