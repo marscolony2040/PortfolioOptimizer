@@ -88,8 +88,13 @@ async def Port(tickers, items, session):
     for t in tickers:
         dp, db, mt, vol = await fetch_data(t, session)
         #print(dp, db, mt)
-        bt = CAPM(items['rf'], items['mkt'], db)
-        beta.append(db)
+        
+        if t == 'SPY':
+            beta.append(1.0)
+            bt = CAPM(items['rf'], items['mkt'], 1.0)
+        else:
+            beta.append(db)
+            bt = CAPM(items['rf'], items['mkt'], db)
         capmx.append(bt)
         price.append(dp)
         mktcap.append(mt)
