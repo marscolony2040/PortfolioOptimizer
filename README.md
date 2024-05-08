@@ -1,4 +1,4 @@
-# Portfolio Optimization Program
+# Target Portfolio w/ Beta & CAPM Optimization
 
 ## Installation Instructions
 1) Clone this repository or download it as a zip file
